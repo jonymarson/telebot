@@ -26,7 +26,7 @@ public class FeedsAlternative extends TelegramProccess {
 	}
 
 	@Override
-	public void run() {
+	void proccess() {
 		SyndFeed feed;
 		try {
 			feed = input.build(new XmlReader(new URL(parametros.get("url"))));
@@ -35,7 +35,7 @@ public class FeedsAlternative extends TelegramProccess {
 			return;
 		}
 		
-		String message = feed.getTitle() + "\n\n";
+		mensagem = feed.getTitle() + "\n\n";
 		
 		for(SyndEntry entry: (List<SyndEntry>)feed.getEntries() ) {
 			
@@ -43,11 +43,12 @@ public class FeedsAlternative extends TelegramProccess {
 			
 				Source source = new Source(entry.getDescription().getValue());
 				
-				message = message + ">>>>>>>>>>>>>>>>>>>>>>>>\n" + source.getRenderer().toString() + "\n";
+				mensagem = mensagem + ">>>>>>>>>>>>>>>>>>>>>>>>\n" + source.getRenderer().toString() + "\n";
 				
 			}
 		
 		}
+		
 	}
 
 }

@@ -4,15 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.fluent.Content;
 import org.apache.http.client.fluent.Form;
 import org.apache.http.client.fluent.Request;
@@ -27,7 +23,6 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -59,8 +54,6 @@ public class TelegramCommandResolverController {
 		Gson gson = new Gson();
 
 		Update update = gson.fromJson(tdpbot.getBody(), Update.class);
-
-		String message = "";
 
 		String keyboard = null;
 
@@ -108,9 +101,9 @@ public class TelegramCommandResolverController {
 				
 				reply_to_message_id = update.message.message_id;
 				
-				message = "Escolha um Album";
+				//message = "Escolha um Album";
 			}catch(Exception e) {
-				message = "Ocorreu um problema. Sorry.";
+				//message = "Ocorreu um problema. Sorry.";
 				System.out.println(e);
 			}
 			
@@ -200,32 +193,16 @@ public class TelegramCommandResolverController {
 				return new String();
 				
 			}catch(Exception e) {
-				message = "Ocorreu um problema. Sorry.";
+				//message = "Ocorreu um problema. Sorry.";
 				System.out.println(e);
 			}
 			
 		}else {
 
-			message = "Desculpe, nao reconheco este comando.";
+			//message = "Desculpe, nao reconheco este comando.";
 		}
 
-		CloseableHttpClient httpclient = HttpClients.createDefault();
 
-		HttpPost httpPost = new HttpPost("https://api.telegram.org/bot115447632:AAGiH7bX_7dpywsXWONvsJPESQe-N7EmcQI/sendMessage");
-		httpPost.addHeader("Content-type", "application/x-www-form-urlencoded");
-		httpPost.addHeader("charset", "UTF-8");
-		List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-		urlParameters.add(new BasicNameValuePair("chat_id", String.valueOf(update.message.chat.id)));
-		urlParameters.add(new BasicNameValuePair("text", message));
-		if(keyboard!=null)
-			urlParameters.add(new BasicNameValuePair("reply_markup", keyboard));
-		if(reply_to_message_id!=null)
-			urlParameters.add(new BasicNameValuePair("reply_to_message_id", reply_to_message_id.toString()));
-
-		httpPost.setEntity(new UrlEncodedFormEntity(urlParameters, "UTF-8"));
-		CloseableHttpResponse response2 = httpclient.execute(httpPost);
-
-		response2.close();
 		
 		return new String();
 
