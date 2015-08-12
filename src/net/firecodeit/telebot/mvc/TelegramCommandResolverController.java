@@ -5,13 +5,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.fluent.Content;
@@ -41,14 +40,11 @@ import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.json.JsonObject;
 import com.restfb.types.Album;
-import com.sun.syndication.feed.synd.SyndEntry;
-import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
-import com.sun.syndication.io.SyndFeedInput;
-import com.sun.syndication.io.XmlReader;
 
 import net.firecodeit.telebot.model.Update;
-import net.htmlparser.jericho.Source;
+import net.firecodeit.telebot.proccess.Feeds;
+import net.firecodeit.telebot.proccess.FeedsAlternative;
 
 @RestController
 public class TelegramCommandResolverController {
@@ -57,6 +53,8 @@ public class TelegramCommandResolverController {
     public @ResponseBody String tdpBotCommandResolver(HttpEntity<String> tdpbot) throws IllegalArgumentException, MalformedURLException, FeedException, IOException {
 		
 		HashMap<String, String> mapAlbums = new HashMap<String, String>();
+		
+		Map<String, String> params = new HashMap<String, String>();
 
 		Gson gson = new Gson();
 
@@ -68,42 +66,27 @@ public class TelegramCommandResolverController {
 
 		Long reply_to_message_id = null;
 
-		SyndFeedInput input = new SyndFeedInput();
 
 		if(update.message.text.equals("/trilhas")) {
 			
-			SyndFeed feed = input.build(new XmlReader(new URL("http://turmadopedal.groupsite.com/rss/events")));
+			params.put("url", "http://turmadopedal.groupsite.com/rss/events");
 			
-			message = feed.getTitle() + "\n";
+			Runnable process = new Feeds(update, params);
 			
-			for(SyndEntry entry: (List<SyndEntry>)feed.getEntries() ) {
-				
-				message = message + "\n>>>>>>>>>>>>>>>>>>>>>>>>\n" + entry.getTitle() + "\n";
-				
-				message = message + "\nResponsavel: " +entry.getAuthor() + "\n";
-				
-				Source source = new Source(entry.getDescription().getValue());
-				
-				message = message + "\n" + source.getRenderer().toString() + "\n";
+			process.run();
 			
-			}
+			return "OK";
+			
 		} else if(update.message.text.equals("/atividades")){
 			
-			SyndFeed feed = input.build(new XmlReader(new URL("http://turmadopedal.groupsite.com/rss/log")));
+			params.put("url", "http://turmadopedal.groupsite.com/rss/log");
 			
-			message = feed.getTitle() + "\n\n";
+			Runnable process = new FeedsAlternative(update, params);
 			
-			for(SyndEntry entry: (List<SyndEntry>)feed.getEntries() ) {
-				
-				if(entry.getPublishedDate().after(DateUtils.addDays(new Date(), -20))) {
-				
-					Source source = new Source(entry.getDescription().getValue());
-					
-					message = message + ">>>>>>>>>>>>>>>>>>>>>>>>\n" + source.getRenderer().toString() + "\n";
-					
-				}
+			process.run();
 			
-			}
+			return "OK";
+			
 		} else if(update.message.text.equals("/fotos")) {
 			
 			try {
